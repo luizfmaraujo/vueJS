@@ -1,72 +1,42 @@
 
 <template>
-<div class="corpo">
-  <h1 class="centralizado"> {{titulo}}</h1>
-
-  <ul class="lista-fotos">
-    <li class="lista-fotos-item" v-for="foto in fotos">
-      <div class="painel">
-
-        <meu-painel :titulo="foto.titulo">
-          <img class="imagem-responsiva" :src="foto.url" :alt="foto.titulo">
-        </meu-painel>
-
-      </div>
-    </li>
-  </ul>
-
-</div>
-
+  <div class="corpo">
+    <meu-menu :rotas="routes"/>
+    <transition name="pagina">
+      <router-view></router-view>
+    </transition>
+  </div>
 </template>
 
 <script>
-
-import Painel from './components/shared/painel/Painel.vue';
-
-export default {
-
-  components: {
-    'meu-painel' : Painel
-  },
-
-  data() {
-    return {
-      titulo:'Alura',
-      fotos: []
+  import { routes } from './routes';
+  import Menu from './components/shared/menu/Menu.vue';
+  export default {
+    components: {
+      'meu-menu':Menu
+    },
+    data() {
+      return {
+        routes: routes.filter(route => route.menu)
+      }
     }
-  },
-  created() {
-
-    this.$http.get('http://localhost:3000/v1/fotos')
-      .then(res => res.json())
-      .then(fotos => this.fotos = fotos, err => console.log(err));
-
   }
-
-}
 </script>
 
 <style>
-  .corpo{
-    font-family:Helvetica, sans-serif;
-    width:96%;
-    margin: O auto;
+  .corpo {
+    font-family: Helvetica, sans-serif;
+    width: 90%;
+    margin: O;
   }
 
-  .centralizado {
-    text-align:center;
+  .pagina-enter, .pagina-leave-active {
+    opacity: 0;
   }
 
-  .lista-fotos {
-    list-style: none;
+  .pagina-enter-active, .pagina-leave-active {
+    transition: 0.3s;
   }
 
-  .lista-fotos .lista-fotos-item {
-    display: inline-block;
-  }
-
-  .imagem-responsiva {
-    width: 100%;
-  }
 
 </style>
