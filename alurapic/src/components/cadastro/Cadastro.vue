@@ -1,114 +1,122 @@
 <template>
-  <div>
-    <h1 class="centralizado">Cadastro</h1>
-    <h2 class="centralizado">{{foto.titulo}}</h2>
-    <form @submit.prevent="grava()">
-      <div class="controle">
-        <label for="titulo">TÍTULO</label>
-        <input name="titulo" data-vv-as="título" id="titulo" autocomplete="off" v-model.lazy="foto.titulo" v-validate data-vv-rules="required|min:3|max:30">
-        <span class="erro" v-show="errors.has('titulo')">{{errors.first('titulo')}}</span>
-      </div>
-      <div class="controle">
-        <label for="url">URL</label>
-        <input name="url" id="url" autocomplete="off" v-model.lazy="foto.url" v-validate data-vv-rules="required">
-        <imagem-responsiva v-show="foto.url" :url="foto.url" :titulo="foto.titulo" />
-        <span class="erro" v-show="errors.has('url')">{{errors.first('url')}}</span>
-      </div>
-      <div class="controle">
-        <label for="descricao">DESCRIÇÃO</label>
-        <textarea id="descricao" autocomplete="off" v-model="foto.descricao"></textarea>
-      </div>
-      <div class="centralizado">
-        <meu-botao rotulo="GRAVAR" tipo="submit" estilo="botao-padrao" />
-        <router-link :to="{name: 'home'}">
-          <meu-botao rotulo="VOLTAR" tipo="button" estilo="botao-padrao" />
-        </router-link>
-      </div>
-    </form>
+  <div id="mapa">
+    <div id="botoes">
+    </div>
+		<div id="camadas">
+			<p>fasfsfaff</p>
+    </div>
   </div>
 </template>
 
 <script>
-  import ImagemResponsiva from '../shared/imagem-responsiva/ImagemResponsiva.vue'
-  import Botao from '../shared/botao/Botao.vue';
-  import Foto from '../../domain/foto/Foto'
-  import FotoService from '../../domain/foto/FotoService'
+import L from 'leaflet';
+import Vue from 'vue';
+import easyButton from 'leaflet-easybutton';
+import BotoesMapa from './BotoesMapas'
+import Camadas from './BotoesMapas'
 
+export default {
+  name: 'Mapa',
+  
+  components: {
+    BotoesMapa, Camadas
+  },
 
-  export default {
-    components: {
-      'imagem-responsiva': ImagemResponsiva,
-      'meu-botao': Botao
-    },
-    data() {
+	data () {
+		return {
+			mapa: null,
+			boxZoom: true,
+			draw: {
+				tools: {},
+				layer: null,
+				options: null
+			},
+		};
+	},
 
-      return {
-        foto: new Foto(),
-        id: this.$route.params.id
-      }
-    },
-    methods: {
+	methods: {
+		createMap () {
+			this.mapa = L.map('mapa', {
+				zoom: 15,
+				minZoom: 4,
+				maxZoom: 18,
+				boxZoom: true,
+				zoomControl: false,
+				contextmenu: true,
+				contextmenuWidth: 140,
+				preferCanvas: true
+			}).setView([-14.7217175, -50.0774443], 5);
+      
+      // Cria a instância global de mapa
+			Vue.prototype.$mapa = this.mapa;
+			
+			L.tileLayer(
+				'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.png').addTo(this.mapa);
 
-      grava() {
-        this.$validator
-          .validateAll()
-          .then(success => {
-            if (success) {
-              this.service
-                .cadastra(this.foto)
-                .then(() => {
-                  if (this.id) {
-                    this.$router.push({
-                      name: 'home'
-                    });
-                  }
-                  this.foto = new Foto();
-                }, err => console.log(err));
-            }
-          })
+			var zoomOptions =  {
+				position: 'topright',
+			};
 
-      }
-    },
-    created() {
-      this.service = new FotoService(this.$resource);
+			L.control.zoom(zoomOptions).addTo(this.mapa);
+		
+			L.easyButton('el-icon-location botao', function(btn,mapa){
+				alert('button works')
+			}).addTo(this.mapa);
+			L.easyButton('icon-lnr-map-marker botao', function(){alert('button works')}).addTo(this.mapa);
+			L.easyButton('icon-vector-polygon botao',  function(){alert('button works')}).addTo(this.mapa);
+			L.easyButton({
+				position: 'topright',
+				states:[{
+			    onClick: function(button, map){
+			    	alert('Map is centered at: ' + map.getCenter().toString());
+			    },
+			    title: 'show me the middle',
+			    icon: 'icon-lnr-frame-expand botao'
+			  }]
+			}).addTo(this.mapa);
 
-      if (this.id) {
-        this.service
-          .busca(this.id)
-          .then(foto => this.foto = foto);
+		},
 
-      }
-    }
-  }
+		updateGeojson (geojson) {
+			// this.municipios = L.geoJson(geojson);
+			// this.mapa.addLayer(this.municipios);
+			// this.mapa.fitBounds(this.municipios.getBounds());
+		}
+
+	},
+
+	mounted () {
+		this.createMap();
+	}
+};
 </script>
 
-<style scoped>
-  .centralizado {
-    text-align: center;
+<style>
+	#mapa {
+    height: 800px;
+		width: 800px;
   }
 
-  .controle {
-    font-size: 1.2em;
-    margin-bottom: 20px;
+  -webkit-box-shadow: 186px 181px 0px 0px rgba(0,0,0,0.75);
+-moz-box-shadow: 186px 181px 0px 0px rgba(0,0,0,0.75);
+box-shadow: 186px 181px 0px 0px rgba(0,0,0,0.75);
+		
+	.botao {
+		font-size: 16px;
+  }
+  
+  .easy-button-button.leaflet-bar-part.leaflet-interactive.unnamed-state-active {
+    border-radius: 15px !important;
+  }
+	.leaflet-control-zoom-in {
+    border-top-left-radius: 15px !important;
+		border-top-right-radius: 15px !important;
   }
 
-  .controle label {
-    display: block;
-    font-weight: bold;
+	.leaflet-control-zoom-out {
+    border-bottom-left-radius: 15px !important;
+		border-bottom-right-radius: 15px !important;
   }
-
-  .controle label+input,
-  .controle textarea {
-    width: 100%;
-    font-size: inherit;
-    border-radius: 5px
-  }
-
-  .centralizado {
-    text-align: center;
-  }
-
-  .erro {
-    color: red;
-  }
+	
+		
 </style>

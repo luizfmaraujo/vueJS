@@ -37,6 +37,5 @@
   .pagina-enter-active, .pagina-leave-active {
     transition: 0.3s;
   }
-
-
+  
 </style>

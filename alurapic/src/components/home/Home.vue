@@ -4,9 +4,10 @@
   <h1 class="centralizado">{{ titulo }}</h1>
   <p class="centralizado texto-alertas" v-show="mensagem">{{ mensagem }}</p>
   <input type="search" class="filtro" @input="filtro = $event.target.value" placeholder="filtre por parte do titulo">
-
-  <ul class="lista-fotos">
-    <li class="lista-fotos-item" v-for="foto in fotosComFiltro">
+<el-date-picker v-model="value1" type="date" placeholder="Pick a day">
+    </el-date-picker>  
+    <ul class="lista-fotos">
+      <li class="lista-fotos-item" v-for="foto in fotosComFiltro">
       <div class="painel">
 
         <meu-painel :titulo="foto.titulo">
